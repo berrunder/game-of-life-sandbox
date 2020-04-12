@@ -3,8 +3,26 @@
   <head>
     <meta charset="utf-8">
     <title>Hello wasm-pack!</title>
+    <style>
+      body {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
   </head>
   <body>
+    <button id="play-pause">⏸</button>
+    <button id="clear-btn">Clear all cells</button>
+    <button id="reset-btn">Seed with random values</button>
+    <label>Delay between frames <input type="range" min="0" max="1000" step="100" value="100" id="delay-slider" /></label>
+    <canvas id="life-canvas"></canvas>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
     <script src="./bootstrap.js"></script>
   </body>
