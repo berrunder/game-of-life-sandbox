@@ -1,5 +1,6 @@
 import { Universe } from 'wasm-game-of-life';
 import { memory } from 'wasm-game-of-life/wasm_game_of_life_bg';
+import Fps from './Fps';
 
 const CELL_SIZE = 8; // px
 const GRID_COLOR = '#ccc';
@@ -17,6 +18,7 @@ canvas.width = (CELL_SIZE + 1) * WIDTH + 1;
 let universe = Universe.new_copperhead(WIDTH, HEIGHT);
 
 const ctx = canvas.getContext('2d');
+const fps = new Fps('fps');
 
 const getIndex = (row, col) => row * WIDTH + col;
 
@@ -83,6 +85,7 @@ let animationId;
 const isPaused = () => !animationId;
 
 const renderLoop = () => {
+  fps.render();
   drawCells();
   sleep(renderTimeout).then(() => {
     animationId = requestAnimationFrame(renderLoop);

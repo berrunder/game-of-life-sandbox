@@ -15,6 +15,10 @@
         align-items: center;
         justify-content: center;
       }
+      #fps {
+        white-space: pre;
+        font-family: monospace;
+      }
     </style>
   </head>
   <body>
@@ -22,6 +26,7 @@
     <button id="clear-btn">Clear all cells</button>
     <button id="reset-btn">Seed with random values</button>
     <label>Delay between frames <input type="range" min="0" max="1000" step="100" value="100" id="delay-slider" /></label>
+    <div id="fps"></div>
     <canvas id="life-canvas"></canvas>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
     <script src="./bootstrap.js"></script>
