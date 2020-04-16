@@ -87,9 +87,13 @@ const isPaused = () => !animationId;
 const renderLoop = () => {
   fps.render();
   drawCells();
-  sleep(renderTimeout).then(() => {
+  if (renderTimeout >= 10) {
+    sleep(renderTimeout).then(() => {
+      animationId = requestAnimationFrame(renderLoop);
+    });
+  } else {
     animationId = requestAnimationFrame(renderLoop);
-  });
+  }
   universe.tick();
 };
 
