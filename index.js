@@ -1,14 +1,8 @@
 import { Universe } from 'wasm-game-of-life';
-import { memory } from 'wasm-game-of-life/wasm_game_of_life_bg';
-import Fps from './Fps';
+import Fps from './lib/Fps';
+import { CELL_SIZE, HEIGHT, WIDTH } from './lib/constants';
+import { drawCells, drawGrid } from './lib/renderer2d';
 
-const CELL_SIZE = 8; // px
-const GRID_COLOR = '#ccc';
-const DEAD_COLOR = '#fff';
-const ALIVE_COLOR = '#000';
-
-const HEIGHT = 100;
-const WIDTH = 128;
 let renderTimeout = 100;
 
 const canvas = document.getElementById('life-canvas');
@@ -19,60 +13,6 @@ let universe = Universe.new_copperhead(WIDTH, HEIGHT);
 
 const ctx = canvas.getContext('2d');
 const fps = new Fps('fps');
-
-const getIndex = (row, col) => row * WIDTH + col;
-
-const drawGrid = () => {
-  ctx.beginPath();
-  ctx.strokeStyle = GRID_COLOR;
-
-  // Vertical lines.
-  for (let i = 0; i <= WIDTH; i++) {
-    const x = i * (CELL_SIZE + 1) + 1;
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, (CELL_SIZE + 1) * HEIGHT + 1);
-  }
-
-  // Horizontal lines.
-  for (let i = 0; i <= HEIGHT; i++) {
-    const y = i * (CELL_SIZE + 1) + 1;
-    ctx.moveTo(0, y);
-    ctx.lineTo((CELL_SIZE + 1) * WIDTH + 1, y);
-  }
-
-  ctx.stroke();
-};
-
-const isBitSet = (byteArray, bitNumber) => {
-  const byteNumber = Math.floor(bitNumber / 8);
-  const mask = 1 << bitNumber % 8;
-
-  return (byteArray[byteNumber] & mask) === mask;
-};
-
-const drawCells = () => {
-  const cellsPtr = universe.cells();
-  const cells = new Uint8Array(memory.buffer, cellsPtr, (WIDTH * HEIGHT) / 8);
-
-  ctx.beginPath();
-
-  for (let row = 0; row < HEIGHT; row++) {
-    for (let col = 0; col < WIDTH; col++) {
-      const idx = getIndex(row, col);
-
-      ctx.fillStyle = isBitSet(cells, idx) ? ALIVE_COLOR : DEAD_COLOR;
-
-      ctx.fillRect(
-        col * (CELL_SIZE + 1) + 1,
-        row * (CELL_SIZE + 1) + 1,
-        CELL_SIZE,
-        CELL_SIZE
-      );
-    }
-  }
-
-  ctx.stroke();
-};
 
 let timeoutId;
 const sleep = (timeout) =>
@@ -85,7 +25,7 @@ let animationId;
 const isPaused = () => !animationId;
 
 const renderLoop = () => {
-  drawCells();
+  drawCells({ ctx, universe });
   fps.render();
   if (renderTimeout >= 10) {
     sleep(renderTimeout).then(() => {
@@ -98,10 +38,6 @@ const renderLoop = () => {
 };
 
 const playPauseBtn = document.getElementById('play-pause');
-const resetBtn = document.getElementById('reset-btn');
-const clearBtn = document.getElementById('clear-btn');
-const delaySlider = document.getElementById('delay-slider');
-renderTimeout = Number(delaySlider.value);
 
 const play = () => {
   playPauseBtn.textContent = '⏸';
@@ -116,28 +52,38 @@ const pause = () => {
   timeoutId = null;
 };
 
-playPauseBtn.addEventListener('click', () => {
+// Event handlers
+const handlePlayPauseClick = () => {
   if (isPaused()) {
     play();
   } else {
     pause();
   }
-});
+};
 
-clearBtn.addEventListener('click', () => {
+let handleResetClick = () => {
+  let wasPaused = isPaused();
+  if (!wasPaused) {
+    pause();
+  }
+  universe.set_width(WIDTH);
+  universe.seed_random();
+  drawCells({ ctx, universe });
+  if (!wasPaused) {
+    play();
+  }
+};
+
+const handleClearClick = () => {
+  if (!isPaused()) {
+    pause();
+  }
   // setting width or height clears all cells
   universe.set_width(WIDTH);
-});
+  drawCells({ ctx, universe });
+};
 
-resetBtn.addEventListener('click', () => {
-  universe = Universe.new(WIDTH, HEIGHT);
-});
-
-delaySlider.addEventListener('change', (event) => {
-  renderTimeout = Number(event.target.value);
-});
-
-canvas.addEventListener('click', (event) => {
+const handleCanvasClick = (event) => {
   const boundingRect = canvas.getBoundingClientRect();
 
   const scaleX = canvas.width / boundingRect.width;
@@ -157,8 +103,25 @@ canvas.addEventListener('click', (event) => {
     universe.toggle_cell(row, col);
   }
 
-  drawCells();
+  drawCells({ ctx, universe });
+};
+
+playPauseBtn.addEventListener('click', handlePlayPauseClick);
+
+const clearBtn = document.getElementById('clear-btn');
+clearBtn.addEventListener('click', handleClearClick);
+
+const resetBtn = document.getElementById('reset-btn');
+resetBtn.addEventListener('click', handleResetClick);
+
+const delaySlider = document.getElementById('delay-slider');
+renderTimeout = Number(delaySlider.value);
+delaySlider.addEventListener('change', (event) => {
+  renderTimeout = Number(event.target.value);
 });
 
-drawGrid();
+canvas.addEventListener('click', handleCanvasClick);
+
+// start rendering
+drawGrid(ctx);
 play();
