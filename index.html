@@ -19,14 +19,28 @@
         white-space: pre;
         font-family: monospace;
       }
+      .button-row {
+        width: 60%;
+        display: flex;
+        justify-content: center;
+        align-items: end;
+      }
+      .row-item {
+        margin: 0 10px;
+      }
+      #play-pause {
+        min-width: 10%;
+      }
     </style>
   </head>
   <body>
-    <button id="play-pause">⏸</button>
-    <button id="clear-btn">Clear all cells</button>
-    <button id="reset-btn">Seed with random values</button>
-    <label>Delay between frames <input type="range" min="0" max="1000" step="100" value="100" id="delay-slider" /></label>
-    <div id="fps"></div>
+  <div class="button-row">
+    <button id="play-pause" class="row-item">⏸</button>
+    <button id="clear-btn" class="row-item">Clear all cells</button>
+    <button id="reset-btn" class="row-item">Seed with random values</button>
+    <div id="fps" class="row-item"></div>
+    <label  class="row-item">Delay between frames <input type="range" min="0" max="1000" step="100" value="100" id="delay-slider" /></label>
+  </div>
     <canvas id="life-canvas"></canvas>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
     <script src="./bootstrap.js"></script>
