@@ -1,4 +1,4 @@
-import { Universe } from 'wasm-game-of-life';
+import { Universe } from '@berrunder/wasm-game-of-life';
 import Fps from './lib/Fps';
 import { CELL_SIZE, HEIGHT, WIDTH } from './lib/constants';
 import { drawCells, drawGrid } from './lib/renderer2d';
